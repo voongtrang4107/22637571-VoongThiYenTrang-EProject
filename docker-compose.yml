@@ -1,0 +1,79 @@
+
+
+services:
+  # MongoDB
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  # RabbitMQ (với giao diện quản lý)
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+
+  # Auth Service
+  auth:
+    build: ./auth
+    container_name: auth
+    restart: always
+    depends_on:
+      - mongo
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./auth/.env
+
+  # Product Service
+  product:
+    build: ./product
+    container_name: product
+    restart: always
+    depends_on:
+      - mongo
+      - rabbitmq
+    ports:
+      - "3001:3001"
+    env_file:
+      - ./product/.env
+
+  # Order Service
+  order:
+    build: ./order
+    container_name: order
+    restart: always
+    depends_on:
+      - mongo
+      - rabbitmq
+    ports:
+      - "3002:3002"
+    env_file:
+      - ./order/.env
+
+  # API Gateway
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    restart: always
+    depends_on:
+      - auth
+      - product
+      - order
+    ports:
+      - "3003:3003"
+    env_file:
+      - ./api-gateway/.env
+
+volumes:
+  mongo-data:

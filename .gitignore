@@ -1,0 +1,13 @@
+# Node modules cho mọi service
+**/node_modules/
+
+# File môi trường (.env) cho mọi service
+**/.env
+**/*.env
+
+# File hệ thống / IDE
+.DS_Store
+**/.DS_Store
+
+.history
+**/.history
