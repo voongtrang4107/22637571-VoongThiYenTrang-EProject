@@ -8,24 +8,16 @@ class MessageBroker {
     async connect() {
         console.log("Connecting to RabbitMQ...");
 
-        // Đợi RabbitMQ khởi động (20s nếu chạy trong Docker)
         setTimeout(async() => {
             try {
-                // 👉 Lấy URL từ biến môi trường .env (RABBITMQ_URL)
-                const amqpUrl = process.env.RABBITMQ_URL || "amqp://admin:admin123@rabbitmq:5672";
-                console.log(`Connecting to ${amqpUrl}`);
-
-                // Kết nối RabbitMQ
-                const connection = await amqp.connect(amqpUrl);
-
+                const connection = await amqp.connect("amqp://rabbitmq:5672");
                 this.channel = await connection.createChannel();
                 await this.channel.assertQueue("products");
-
-                console.log("RabbitMQ connected successfully (Product Service)");
+                console.log("RabbitMQ connected");
             } catch (err) {
                 console.error("Failed to connect to RabbitMQ:", err.message);
             }
-        }, 20000);
+        }, 20000); // delay 10 seconds to wait for RabbitMQ to start
     }
 
     async publishMessage(queue, message) {
@@ -39,9 +31,8 @@ class MessageBroker {
                 queue,
                 Buffer.from(JSON.stringify(message))
             );
-            console.log(`Message sent to queue '${queue}'`);
         } catch (err) {
-            console.error("Error while publishing message:", err.message);
+            console.log(err);
         }
     }
 
@@ -57,10 +48,9 @@ class MessageBroker {
                 const parsedContent = JSON.parse(content);
                 callback(parsedContent);
                 this.channel.ack(message);
-                console.log(`Consumed message from '${queue}'`);
             });
         } catch (err) {
-            console.error("Error while consuming message:", err.message);
+            console.log(err);
         }
     }
 }

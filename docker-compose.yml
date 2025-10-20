@@ -1,7 +1,9 @@
-
+version: "3.9"
 
 services:
-  # MongoDB
+  # ========================
+  # 🧩 MongoDB
+  # ========================
   mongo:
     image: mongo:6
     container_name: mongo
@@ -11,19 +13,22 @@ services:
     volumes:
       - mongo-data:/data/db
 
-  # RabbitMQ (với giao diện quản lý)
+  # ========================
+  # 🐇 RabbitMQ (guest/guest mặc định)
+  # ========================
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
     restart: always
     ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: admin
-      RABBITMQ_DEFAULT_PASS: admin123
+      - "5672:5672"     # AMQP port
+      - "15672:15672"   # Management UI
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
 
-  # Auth Service
+  # ========================
+  # 🔑 Auth Service
+  # ========================
   auth:
     build: ./auth
     container_name: auth
@@ -35,7 +40,9 @@ services:
     env_file:
       - ./auth/.env
 
-  # Product Service
+  # ========================
+  # 📦 Product Service
+  # ========================
   product:
     build: ./product
     container_name: product
@@ -48,7 +55,9 @@ services:
     env_file:
       - ./product/.env
 
-  # Order Service
+  # ========================
+  # 🧾 Order Service
+  # ========================
   order:
     build: ./order
     container_name: order
@@ -61,7 +70,9 @@ services:
     env_file:
       - ./order/.env
 
-  # API Gateway
+  # ========================
+  # 🌐 API Gateway
+  # ========================
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
@@ -75,5 +86,9 @@ services:
     env_file:
       - ./api-gateway/.env
 
+# ==========================
+# 💾 Volumes
+# ==========================
 volumes:
   mongo-data:
+  rabbitmq-data:
